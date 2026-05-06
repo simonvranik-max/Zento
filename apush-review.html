@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APUSH Review — Periods 1–6</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:#0a0a0f;color:#e8e3d5;min-height:100vh;}
+  .screen{display:none;padding:1.5rem;min-height:100vh;}
+  .screen.active{display:flex;flex-direction:column;align-items:center;}
+
+  /* HOME */
+  .home-header{text-align:center;margin-bottom:1.75rem;margin-top:1rem;}
+  .home-title{font-family:'Playfair Display',serif;font-size:2.8rem;color:#c9a84c;letter-spacing:-1px;line-height:1;}
+  .home-sub{font-size:0.72rem;color:#555;letter-spacing:3px;text-transform:uppercase;margin-top:0.4rem;}
+  .seal{width:72px;height:72px;border-radius:50%;border:2px solid #c9a84c;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2.2rem;}
+  .unit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;width:100%;max-width:580px;margin-bottom:10px;}
+  .unit-card{background:#131318;border:1px solid #2a2a35;border-radius:11px;padding:0.95rem;cursor:pointer;transition:all 0.18s;text-align:left;position:relative;overflow:hidden;}
+  .unit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#c9a84c;transform:scaleX(0);transition:transform 0.18s;}
+  .unit-card.selected{border-color:#c9a84c;background:#1a1a0f;}
+  .unit-card.selected::before{transform:scaleX(1);}
+  .unit-card:hover{border-color:#c9a84c44;}
+  .unit-num{font-size:0.62rem;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+  .unit-name{font-size:0.82rem;font-weight:500;color:#e8e3d5;line-height:1.3;}
+  .unit-years{font-size:0.68rem;color:#444;margin-top:2px;}
+  .chk{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:#c9a84c;display:none;align-items:center;justify-content:center;font-size:10px;color:#0a0a0f;}
+  .unit-card.selected .chk{display:flex;}
+  .mix-card{grid-column:1/-1;background:#131318;border:1px solid #2a2a35;border-radius:11px;padding:0.9rem;cursor:pointer;transition:all 0.18s;text-align:center;}
+  .mix-card.selected{border-color:#c9a84c;background:#1a1a0f;}
+  .mix-card:hover{border-color:#c9a84c44;}
+  .sec-label{font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;color:#3a3a3a;margin-bottom:0.65rem;margin-top:0.25rem;width:100%;max-width:580px;}
+  .start-btn{padding:0.95rem 2.5rem;background:#c9a84c;color:#0a0a0f;border:none;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;transition:all 0.2s;width:100%;max-width:580px;margin-top:0.25rem;}
+  .start-btn:hover{background:#e8c45a;transform:translateY(-1px);}
+  .start-btn:disabled{background:#1c1c22;color:#444;cursor:not-allowed;transform:none;}
+
+  /* MCQ */
+  .mcq-topbar{width:100%;max-width:680px;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:12px;}
+  .prog-bar{flex:1;height:3px;background:#1a1a22;border-radius:2px;overflow:hidden;}
+  .prog-fill{height:100%;background:#c9a84c;border-radius:2px;transition:width 0.4s;}
+  .stat-chip{background:#131318;border:1px solid #2a2a35;border-radius:100px;padding:4px 13px;font-size:0.72rem;color:#888;white-space:nowrap;}
+  .stat-chip span{color:#c9a84c;font-weight:500;}
+
+  .stimulus-block{background:#0e0e16;border:1px solid #2a2a35;border-left:3px solid #c9a84c;border-radius:11px;padding:1.25rem 1.5rem;width:100%;max-width:680px;margin-bottom:1rem;}
+  .stimulus-meta{font-size:0.63rem;letter-spacing:2px;text-transform:uppercase;color:#c9a84c;margin-bottom:0.6rem;}
+  .stimulus-text{font-size:0.88rem;line-height:1.8;color:#b8b0a0;font-style:italic;}
+  .stimulus-attribution{font-size:0.74rem;color:#555;margin-top:0.65rem;font-style:normal;}
+
+  .q-card{background:#131318;border:1px solid #2a2a35;border-radius:14px;padding:1.5rem;width:100%;max-width:680px;margin-bottom:0.9rem;}
+  .q-period-tag{font-size:0.62rem;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.55rem;display:block;}
+  .set-badge{background:#1a1508;border:1px solid #c9a84c33;border-radius:5px;padding:3px 8px;font-size:0.63rem;color:#c9a84c88;letter-spacing:1px;text-transform:uppercase;display:inline-block;margin-bottom:0.5rem;}
+  .q-text{font-size:1rem;line-height:1.65;color:#e8e3d5;}
+
+  .opts{width:100%;max-width:680px;display:flex;flex-direction:column;gap:8px;margin-bottom:0.9rem;}
+  .opt{background:#111116;border:1px solid #252530;border-radius:10px;padding:0.9rem 1.1rem;color:#c8c0b0;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;text-align:left;transition:all 0.13s;display:flex;align-items:flex-start;gap:10px;line-height:1.5;}
+  .opt:hover:not(:disabled){border-color:#c9a84c44;background:#16161e;color:#e8e3d5;}
+  .opt.correct{border-color:#2a5a0a;background:#0a1a04;color:#8dc45a;}
+  .opt.wrong{border-color:#7a1a1a;background:#1a0606;color:#e08080;}
+  .opt.missed{border-color:#2a5a0a55;background:#0a1a0422;color:#8dc45a77;}
+  .opt:disabled{cursor:default;}
+  .opt-ltr{min-width:24px;height:24px;border-radius:5px;background:#1e1e28;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:500;flex-shrink:0;color:#666;margin-top:1px;}
+  .opt.correct .opt-ltr{background:#2a5a0a;color:#a0d870;}
+  .opt.wrong .opt-ltr{background:#7a1a1a;color:#e08080;}
+  .opt.missed .opt-ltr{background:#2a5a0a55;color:#8dc45a88;}
+
+  .exp-box{width:100%;max-width:680px;border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.9rem;font-size:0.86rem;line-height:1.65;display:none;}
+  .exp-box.show{display:block;}
+  .exp-box.ok{background:#080f04;border:1px solid #2a5a0a66;color:#8dc45a;}
+  .exp-box.bad{background:#100404;border:1px solid #7a1a1a66;color:#e08080;}
+  .exp-label{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.4rem;opacity:0.7;}
+
+  .next-btn{padding:0.8rem 2.2rem;background:#c9a84c;color:#0a0a0f;border:none;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:none;margin-bottom:0.5rem;}
+  .next-btn.show{display:block;}
+  .next-btn:hover{background:#e8c45a;}
+  .back-btn{background:transparent;border:1px solid #252530;border-radius:100px;padding:0.55rem 1.4rem;color:#555;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.2s;margin-top:0.75rem;}
+  .back-btn:hover{border-color:#555;color:#e8e3d5;}
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="screen active">
+  <div class="home-header">
+    <div class="seal">🦅</div>
+    <div class="home-title">APUSH</div>
+    <div class="home-sub">Exam-Style MCQ · Periods 1–6</div>
+  </div>
+
+  <div class="sec-label">Select units to review</div>
+  <div class="unit-grid">
+    <div class="unit-card" onclick="toggleUnit('p1')" id="unit-p1">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 1</div>
+      <div class="unit-name">Contact &amp; Conquest</div>
+      <div class="unit-years">1491–1607</div>
+    </div>
+    <div class="unit-card" onclick="toggleUnit('p2')" id="unit-p2">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 2</div>
+      <div class="unit-name">Colonial Era</div>
+      <div class="unit-years">1607–1754</div>
+    </div>
+    <div class="unit-card" onclick="toggleUnit('p3')" id="unit-p3">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 3</div>
+      <div class="unit-name">Revolution &amp; Republic</div>
+      <div class="unit-years">1754–1800</div>
+    </div>
+    <div class="unit-card" onclick="toggleUnit('p4')" id="unit-p4">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 4</div>
+      <div class="unit-name">Democracy &amp; Expansion</div>
+      <div class="unit-years">1800–1848</div>
+    </div>
+    <div class="unit-card" onclick="toggleUnit('p5')" id="unit-p5">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 5</div>
+      <div class="unit-name">Civil War &amp; Recon.</div>
+      <div class="unit-years">1844–1877</div>
+    </div>
+    <div class="unit-card" onclick="toggleUnit('p6')" id="unit-p6">
+      <div class="chk">✓</div>
+      <div class="unit-num">Period 6</div>
+      <div class="unit-name">Industrialization</div>
+      <div class="unit-years">1865–1898</div>
+    </div>
+    <div class="unit-card mix-card" onclick="toggleUnit('mix')" id="unit-mix">
+      <div class="chk">✓</div>
+      <div class="unit-num">Mix</div>
+      <div class="unit-name">All Periods · 1491–1898</div>
+    </div>
+  </div>
+  <div class="sec-label" style="margin-top:0.4rem;">stimulus-based sets · exam difficulty · instant feedback</div>
+  <button class="start-btn" id="startBtn" onclick="startGame()" disabled>Select units to begin</button>
+</div>
+
+<!-- MCQ SCREEN -->
+<div id="mcqScreen" class="screen">
+  <div class="mcq-topbar">
+    <div class="stat-chip">🔥 <span id="streakNum">0</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="stat-chip">Q<span id="qNum">1</span> · <span id="accNum">–</span></div>
+  </div>
+
+  <div class="stimulus-block" id="stimBlock" style="display:none">
+    <div class="stimulus-meta" id="stimMeta">Primary Source</div>
+    <div class="stimulus-text" id="stimText"></div>
+    <div class="stimulus-attribution" id="stimAttr"></div>
+  </div>
+
+  <div class="q-card">
+    <div class="set-badge" id="setBadge" style="display:none"></div>
+    <span class="q-period-tag" id="qTag">Period 1</span>
+    <div class="q-text" id="qText">Loading...</div>
+  </div>
+
+  <div class="opts" id="optsList"></div>
+  <div class="exp-box" id="expBox">
+    <div class="exp-label" id="expLabel"></div>
+    <span id="expText"></span>
+  </div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+  <button class="back-btn" onclick="goHome()">← Back to menu</button>
+</div>
+
+<script>
+const PTAGS = {
+  p1:'Period 1 · 1491–1607',
+  p2:'Period 2 · 1607–1754',
+  p3:'Period 3 · 1754–1800',
+  p4:'Period 4 · 1800–1848',
+  p5:'Period 5 · 1844–1877',
+  p6:'Period 6 · 1865–1898'
+};
+
+const SETS = {
+p1:[
+  {period:'p1',stimulus:{meta:'Secondary Source — Historian',
+    text:'The conquistadors arrived not as settlers but as extractors. Their legal and religious framework — the Requerimiento, the Encomienda, the casta hierarchy — was designed not to incorporate Native peoples as equals, but to systematize their subordination in a manner legible to European law while maximizing the flow of labor and precious metals back to Castile.',
+    attr:'— Adapted from David Weber, The Spanish Frontier in North America, 1992'},
+  questions:[
+    {q:'The author\'s argument most directly supports which of the following historical interpretations of the Spanish colonial project?',
+     opts:['The Spanish legal system functioned as intended, integrating Native peoples gradually into colonial governance','Spanish colonization was primarily a religious enterprise that used economic incentives to achieve conversion goals','Spanish colonial institutions were systematically designed to extract resources and labor while maintaining the appearance of legal and moral legitimacy','The encomienda system created conditions that ultimately led to Native American cultural and political independence'],
+     ans:2,
+     exp:'Weber argues the entire legal apparatus — Requerimiento, Encomienda, caste system — was engineered to subordinate Native peoples and extract wealth, not to genuinely incorporate them. The "legible to European law" phrase is key: it maintained the facade of legitimacy while enabling exploitation.'},
+    {q:'Which of the following developments from the same period would most UNDERMINE the author\'s argument?',
+     opts:['The promulgation of the New Laws of 1542, which attempted to limit encomienda abuses and protect Native people from the worst forms of forced labor','The establishment of the mita labor system in Peru, which required Native communities to supply rotating forced labor to Spanish silver mines','The Pueblo Revolt of 1680, in which Pueblo peoples successfully expelled Spanish colonizers from New Mexico for twelve years','The introduction of African enslaved labor as a replacement for declining Native populations in Caribbean plantations'],
+     ans:0,
+     exp:'The New Laws of 1542 are the strongest counterevidence — they represent an attempt by the Spanish Crown to actually reform the encomienda and protect Native labor rights. While often unenforced, their existence complicates the argument that the system was purely extractive with no reform impulse.'},
+  ]},
+  {period:'p1',stimulus:{meta:'Primary Source — European Account',
+    text:'They are so ingenuous and free with all they have, that no one would believe it who has not seen it; of anything they possess, if it be asked of them, they never say no; on the contrary, they invite you to share it and show as much love as if their hearts went with it.',
+    attr:'— Christopher Columbus, Letter to the Sovereigns of Spain, 1493'},
+  questions:[
+    {q:'Columbus\'s characterization of the Taíno people in this excerpt most directly served which political purpose?',
+     opts:['To warn the Spanish Crown that the indigenous population would resist colonization and require large military forces','To argue that the Taíno were sophisticated traders whose economic networks could be integrated into Spanish mercantile systems','To present the Taíno as childlike and without property claims, thereby justifying Spanish appropriation of their land and labor under the doctrine of terra nullius','To demonstrate that the Taíno shared Christian values of generosity and were therefore already spiritually prepared for conversion'],
+     ans:2,
+     exp:'Columbus\'s depiction of the Taíno as generous to a fault — giving everything away — served to frame them as lacking the European concept of property ownership. This framing supported the legal doctrine that the land was effectively unowned (terra nullius), making Spanish seizure legally and morally justifiable under European law.'},
+  ]},
+  {period:'p1',stimulus:{meta:'Secondary Source — Historical Analysis',
+    text:'The Columbian Exchange was not a biological accident but an ecological conquest. European diseases, livestock, and crops did not travel to the Americas as neutral passengers — they were vectors of a demographic catastrophe that fundamentally altered the labor calculus of every colonial enterprise and made the Atlantic slave trade not merely possible but, from the colonizers\' perspective, economically necessary.',
+    attr:'— Adapted from Alfred Crosby, The Columbian Exchange, 1972'},
+  questions:[
+    {q:'The argument in the excerpt most directly challenges which common historical interpretation?',
+     opts:['That the Atlantic slave trade was primarily driven by cultural racism rather than economic necessity','That European colonialism was fundamentally a religious rather than economic enterprise','That the spread of Old World diseases to the Americas was an unintended and largely accidental consequence of contact with no bearing on colonial labor systems','That Native American populations had developed complex enough political systems to resist Spanish colonialism effectively'],
+     ans:2,
+     exp:'Crosby explicitly argues the disease exchange was not accidental — it was part of a larger "ecological conquest." More importantly, he connects the demographic collapse directly to the economic logic of the slave trade, arguing the two cannot be separated. This challenges the view that disease spread was simply an unfortunate accident unrelated to colonial exploitation.'},
+    {q:'Which of the following pieces of evidence would most directly support Crosby\'s interpretation?',
+     opts:['The establishment of Jesuit missions throughout California, which attempted to preserve Native American populations through religious conversion','The rapid shift by Caribbean planters from Native American to African enslaved labor as indigenous populations collapsed from disease within two generations of contact','The Spanish Crown\'s passage of the New Laws of 1542, which banned the enslavement of Native Americans and attempted to phase out the encomienda','The development of the mita labor system in Andean Peru, which continued to rely primarily on Native American labor for silver mining throughout the colonial period'],
+     ans:1,
+     exp:'The shift from Native to African labor in the Caribbean is the direct evidence Crosby\'s argument predicts: as disease destroyed the Native labor supply, colonizers turned to the Atlantic slave trade to replace it. This chain of causation — disease → demographic collapse → slave trade — is exactly what Crosby argues.'},
+  ]},
+],
+
+p2:[
+  {period:'p2',stimulus:{meta:'Primary Source — Colonial Sermon',
+    text:'We must consider that we shall be as a City upon a Hill, the eyes of all people are upon us. So that if we shall deal falsely with our God in this work we have undertaken, and so cause Him to withdraw His present help from us, we shall be made a story and a by-word through the world.',
+    attr:'— John Winthrop, "A Model of Christian Charity," aboard the Arbella, 1630'},
+  questions:[
+    {q:'Winthrop\'s sermon most directly reflects which of the following tensions in Puritan political theology?',
+     opts:['Between the desire for religious freedom and the reality of Puritan intolerance of dissent within Massachusetts Bay Colony','Between Puritan communal religious obligations and the emerging individualism of the First Great Awakening','Between Puritan economic ambitions and the strict regulations imposed by the English Crown on colonial trade','Between Calvinist predestination theology and the Arminian free-will doctrine gaining influence in New England'],
+     ans:0,
+     exp:'The sermon establishes Massachusetts Bay as a divinely watched model community — which created enormous pressure to maintain religious conformity. This is the core tension: Puritans fled religious persecution yet built a society that expelled Anne Hutchinson, Roger Williams, and anyone who challenged their theological consensus. The "eyes of all people" created a justification for intolerance.'},
+    {q:'The ideas expressed in Winthrop\'s sermon most directly contributed to which of the following long-term developments in American political culture?',
+     opts:['The establishment of formal separation of church and state codified in colonial charters throughout New England','The tradition of American exceptionalism — the belief that the United States has a special moral mission to serve as a model for other nations','The First Great Awakening\'s emphasis on individual conversion experience over communal religious covenant','The development of the headright system, which tied land ownership to religious community membership in early New England'],
+     ans:1,
+     exp:'Winthrop\'s "City upon a Hill" became one of the foundational texts of American exceptionalism — the idea that America has a unique providential mission to model liberty and virtue for the world. Presidents from JFK to Reagan explicitly invoked this passage to justify American global leadership.'},
+  ]},
+  {period:'p2',stimulus:{meta:'Historical Context — Bacon\'s Rebellion, 1676',
+    text:'When William Berkeley, governor of Virginia, refused to authorize military campaigns against frontier Native American tribes, Nathaniel Bacon organized an unauthorized army of poor white farmers, indentured servants, and enslaved Africans — burning Jamestown and forcing the governor to flee. The rebellion collapsed with Bacon\'s sudden death, but the coalition it briefly assembled terrified the Tidewater planter elite.',
+    attr:'— Adapted from Edmund Morgan, American Slavery, American Freedom, 1975'},
+  questions:[
+    {q:'According to Edmund Morgan\'s analysis, the most significant long-term consequence of Bacon\'s Rebellion for Virginia\'s planters was that it:',
+     opts:['Convinced them to seek reconciliation with frontier farmers by distributing land more equitably across the colony','Demonstrated that class-based alliances across racial lines among the poor could destabilize planter authority, accelerating the shift toward enslaved African labor as a more racially controllable workforce','Led to a permanent weakening of the governor\'s power relative to the House of Burgesses, creating more democratic colonial governance','Resulted in harsher military campaigns against Native Americans that opened new land for small white farmers, defusing class tensions'],
+     ans:1,
+     exp:'Morgan\'s thesis in American Slavery, American Freedom is that the interracial coalition in Bacon\'s Rebellion — poor whites, servants, and enslaved people united against elites — was the planters\' nightmare scenario. Their solution was to replace the economically volatile and politically dangerous indentured servant class with enslaved Africans, creating a racial caste system that divided poor whites and Black workers by giving whites a stake in white supremacy.'},
+    {q:'Which of the following most directly illustrates the transformation described in the excerpt?',
+     opts:['The Virginia House of Burgesses\' passage of laws in the 1660s–1680s that codified hereditary slavery along racial lines, systematically distinguishing the legal status of African laborers from European servants','The Navigation Acts of 1660, which restricted colonial trade and created economic frustrations that fueled class resentment among small farmers','The Stono Rebellion of 1739, in which enslaved Africans in South Carolina organized an armed revolt, demonstrating that the shift to enslaved labor had not eliminated the threat of insurrection','The Proclamation of 1763, which restricted westward settlement and renewed class tensions between frontier farmers and Eastern elites'],
+     ans:0,
+     exp:'The Virginia slave codes of the 1660s–1680s are the direct institutional response to Bacon\'s Rebellion. These laws — making slavery hereditary, defining it by race, stripping enslaved Africans of legal personhood — represent exactly the racial caste system Morgan describes as the planter class\'s solution to the problem of interracial class solidarity.'},
+  ]},
+  {period:'p2',stimulus:{meta:'Primary Source — Legal Document',
+    text:'Be it enacted by the Right Honourable the Lord Proprietary... that no person or persons whatsoever within this Province... professing to believe in Jesus Christ, shall from henceforth be in any ways troubled, molested or discountenanced for or in respect of his or her religion nor in the free exercise thereof.',
+    attr:'— Maryland Toleration Act, 1649'},
+  questions:[
+    {q:'The Maryland Toleration Act of 1649 is best understood in the context of which of the following?',
+     opts:['A broad Enlightenment movement across the English colonies toward universal religious liberty and separation of church and state','The proprietor\'s pragmatic attempt to protect the Catholic minority — including the colony\'s founders — in a colony with a growing Protestant majority, rather than a principled commitment to universal religious freedom','A direct response to the religious persecutions occurring in Massachusetts Bay Colony under Puritan leadership','The English Crown\'s directive to establish a uniform religious policy across all thirteen colonies to prevent sectarian conflict'],
+     ans:1,
+     exp:'The Toleration Act was strategically motivated, not principled. Maryland\'s Catholic founders (the Calvert family) were becoming outnumbered by Protestant settlers. By enshrining toleration for all Christians, they protected their own minority. The Act explicitly excluded Jews, atheists, and non-Christians from protection — it was toleration within limits, driven by Catholic self-preservation.'},
+  ]},
+],
+
+p3:[
+  {period:'p3',stimulus:{meta:'Primary Source — Political Essay',
+    text:'The accumulation of all powers, legislative, executive, and judiciary, in the same hands, whether of one, a few, or many, and whether hereditary, self-appointed, or elective, may justly be pronounced the very definition of tyranny... It is agreed on all sides, that the powers properly belonging to one of the departments ought not to be directly and completely administered by either of the other departments.',
+    attr:'— James Madison, Federalist No. 47, 1788'},
+  questions:[
+    {q:'Madison\'s argument in this excerpt most directly addresses which concern raised by Anti-Federalists during the ratification debates?',
+     opts:['That the Constitution failed to include a bill of rights protecting individual liberties from federal overreach','That the proposed federal government\'s separation of powers was insufficient, and that the branches were too interdependent to prevent tyranny','That Congress had been given too little authority relative to the executive branch, making effective lawmaking impossible','That the large republic created by the Constitution would be too geographically vast for representatives to remain accountable to their constituents'],
+     ans:1,
+     exp:'Anti-Federalists argued the Constitution did not adequately separate powers and that the branches could too easily combine against liberty. Madison is defending the Constitution by arguing that true tyranny is the combination of all powers in one place — and that the Constitution\'s checks and balances prevent this. He\'s responding directly to the "tyranny" criticism.'},
+    {q:'The principle Madison articulates in this excerpt most directly builds upon which Enlightenment thinker\'s political theory?',
+     opts:['John Locke\'s social contract theory, which argued that government derives legitimacy from the consent of the governed and can be overthrown when it violates natural rights','Jean-Jacques Rousseau\'s concept of the general will, which held that true democracy requires direct participation of all citizens in lawmaking','Montesquieu\'s argument in The Spirit of the Laws that political liberty can only be preserved through the separation of executive, legislative, and judicial powers into distinct branches','Thomas Hobbes\'s Leviathan, which argued that strong centralized authority was necessary to prevent the chaos of the state of nature'],
+     ans:2,
+     exp:'Montesquieu\'s separation of powers doctrine is the direct intellectual source for what Madison is describing. The argument that combining all governmental power in one body constitutes tyranny, and that liberty requires institutional separation, comes directly from Montesquieu\'s The Spirit of the Laws (1748), which Madison and the Founders explicitly cited.'},
+  ]},
+  {period:'p3',stimulus:{meta:'Secondary Source — Historian',
+    text:'The Election of 1800 was not merely a political contest — it was a constitutional crisis that tested whether the republic could survive a genuine transfer of power between competing factions. That it did so peacefully, with Federalists surrendering authority they had exercised for a decade, marked what Jefferson himself called a "revolution" — not in the sense of violence, but of principle.',
+    attr:'— Adapted from John Ferling, Adams vs. Jefferson: The Tumultuous Election of 1800, 2004'},
+  questions:[
+    {q:'The historian\'s characterization of the Election of 1800 as a "revolution" most directly challenges which historical assumption?',
+     opts:['That Jefferson\'s Democratic-Republican party held fundamentally different economic views from Hamilton\'s Federalist party','That the Constitutional Convention had deliberately designed the Electoral College to prevent democratic elections from destabilizing the republic','That American democratic institutions were inherently fragile and required the continuation of Federalist leadership to survive','That a republican government was capable of achieving peaceful transfers of power between political opponents — a transition most contemporary observers believed republics historically failed to make'],
+     ans:3,
+     exp:'The prevailing belief among political theorists of the era — drawing on the history of Rome and the recent French Revolution — was that republics almost always collapsed into factional violence when power changed hands. Jefferson\'s "revolution in principle" was significant precisely because it proved this pessimism wrong: the losing party accepted defeat without violence, establishing the precedent of peaceful democratic transition.'},
+  ]},
+  {period:'p3',stimulus:{meta:'Primary Source — Letter',
+    text:'I long to hear that you have declared an independency — and by the way in the new Code of Laws which I suppose it will be necessary for you to make I desire you would Remember the Ladies, and be more generous and favourable to them than your ancestors. Do not put such unlimited power into the hands of the Husbands.',
+    attr:'— Abigail Adams, Letter to John Adams, March 31, 1776'},
+  questions:[
+    {q:'Abigail Adams\'s letter most directly illustrates which of the following tensions in Revolutionary-era American political thought?',
+     opts:['Between the Patriots\' rhetoric of natural rights and universal equality and their simultaneous exclusion of women from the political rights they claimed for themselves','Between John Adams\'s Federalist political philosophy and Abigail Adams\'s Democratic-Republican sympathies','Between the Continental Congress\'s economic priorities and the domestic concerns of colonists on the homefront during the war','Between Enlightenment rationalism and the religious conservatism that continued to define gender roles in colonial New England'],
+     ans:0,
+     exp:'Adams\'s letter is a direct confrontation with the hypocrisy at the heart of Revolutionary ideology: men demanding rights from Britain while denying those same rights to women within their own households. Her phrase "remember the ladies" applied the language of tyranny — "unlimited power" — to marital law, using the Revolution\'s own logic against its architects.'},
+    {q:'The concept of "Republican Motherhood" that emerged after the Revolution most directly represented which response to the argument Abigail Adams makes in this letter?',
+     opts:['A direct fulfillment of her demands, as women gained formal political participation through the right to vote in most states by 1790','A compromise that acknowledged women\'s civic importance through their role as educators of virtuous male citizens, while maintaining their exclusion from direct political participation','A conservative rejection of her argument, as post-Revolutionary legal codes actually reduced women\'s property rights compared to colonial-era coverture laws','An Enlightenment-based argument that women\'s reason was fundamentally inferior to men\'s and that political exclusion was therefore rational and just'],
+     ans:1,
+     exp:'Republican Motherhood was a carefully negotiated cultural settlement: it elevated women\'s status by defining motherhood as a civic duty essential to the republic, but it did so precisely to channel women\'s political energy into domestic education rather than formal participation. It honored the spirit of Adams\'s argument just enough to contain its radical implications.'},
+  ]},
+],
+
+p4:[
+  {period:'p4',stimulus:{meta:'Primary Source — Supreme Court Opinion',
+    text:'It is emphatically the province and duty of the Judicial Department to say what the law is... If two laws conflict with each other, the Courts must decide on the operation of each. So, if a law be in opposition to the Constitution, if both the law and the Constitution apply to a particular case... the Court must determine which of these conflicting rules governs the case. This is of the very essence of judicial duty.',
+    attr:'— Chief Justice John Marshall, Marbury v. Madison, 1803'},
+  questions:[
+    {q:'Chief Justice Marshall\'s reasoning in this excerpt represents which of the following constitutional innovations?',
+     opts:['The explicit assertion, already stated in Article III of the Constitution, that the Supreme Court held final authority over constitutional interpretation','The judicial creation of the doctrine of implied powers, allowing Congress to pass laws not explicitly listed in the Constitution','The establishment of judicial review — the Court\'s self-asserted authority to invalidate acts of Congress that conflict with the Constitution — a power not explicitly granted in the constitutional text','The precedent that the President could not appoint federal judges without Senate confirmation, limiting executive patronage power'],
+     ans:2,
+     exp:'Judicial review is not in the Constitution — Marshall invented it here. Article III describes the Court\'s jurisdiction but says nothing about the power to strike down acts of Congress. Marshall\'s brilliant move was to rule against his own party (the Federalists who had appointed Marbury) in order to establish the far more important principle that the Court was the ultimate arbiter of constitutional meaning.'},
+    {q:'Jefferson\'s Democratic-Republicans most strongly objected to the Marbury decision for which of the following reasons?',
+     opts:['They opposed Marshall\'s ruling that Marbury was entitled to his commission and believed the appointment was illegitimate','They believed Marshall had correctly identified a constitutional conflict but should have deferred to Congress rather than asserting judicial supremacy','They argued that Marshall\'s establishment of judicial review gave the unelected federal judiciary a power to block majority will that was incompatible with democratic self-governance','They objected to the ruling on the grounds that the Supreme Court lacked jurisdiction to hear cases involving presidential appointments'],
+     ans:2,
+     exp:'Jefferson and Democratic-Republicans feared judicial review as an antidemocratic power grab — unelected judges appointed for life could now nullify the will of elected majorities. Jefferson specifically worried that a Federalist-packed judiciary would use this new power to block Democratic-Republican legislation, which is exactly what he feared Marshall intended.'},
+  ]},
+  {period:'p4',stimulus:{meta:'Secondary Source — Historian',
+    text:'Jackson\'s democracy was a democracy of white men. The Age of the Common Man was also the age of Indian removal, of the expansion of slavery into new territories, and of the systematic exclusion of free Black citizens from political participation. The democratic energy unleashed in the 1820s and 1830s flowed through racial channels that simultaneously widened the circle of white male citizenship while narrowing the possibilities for everyone else.',
+    attr:'— Adapted from Sean Wilentz, The Rise of American Democracy, 2005'},
+  questions:[
+    {q:'The historian\'s argument most directly challenges which celebratory interpretation of Jacksonian Democracy?',
+     opts:['The view that Andrew Jackson\'s destruction of the Second Bank of the United States represented a principled stand against economic elites that benefited working-class Americans','The interpretation that Jacksonian Democracy represented a broadly inclusive expansion of American democracy that brought the common people into political power','The argument that the Democratic Party\'s creation under Jackson established durable political institutions that stabilized American electoral competition','The view that Jackson\'s spoils system, while corrupt, democratized federal employment by breaking the hold of the educated elite on government positions'],
+     ans:1,
+     exp:'Wilentz is directly targeting the triumphalist narrative of "Jacksonian Democracy as great democratization." He concedes the expansion of white male suffrage but argues this expansion was constitutively dependent on racial exclusion — it was democracy for white men built on Native dispossession, slavery\'s expansion, and free Black disenfranchisement.'},
+    {q:'Which of the following would most directly support the historian\'s interpretation?',
+     opts:['The Indian Removal Act of 1830 and the Trail of Tears, combined with Southern states\' systematic disenfranchisement of free Black men who had previously voted, occurring simultaneously with the expansion of white male suffrage','The nullification crisis of 1832–33, in which South Carolina attempted to void federal tariff law, demonstrating the limits of Jacksonian federal authority','The establishment of the Whig Party as a direct response to Jackson\'s perceived executive overreach, showing that democratic opposition remained vibrant','The Mexican-American War of 1846–48, which acquired vast new territories and reopened the question of slavery\'s expansion into the West'],
+     ans:0,
+     exp:'The simultaneity is the evidence: the exact same years that saw the elimination of property requirements for white male voters saw the forced deportation of the Five Civilized Tribes and the stripping of voting rights from free Black men in Pennsylvania, North Carolina, and Tennessee. This is the racial channeling Wilentz describes.'},
+  ]},
+],
+
+p5:[
+  {period:'p5',stimulus:{meta:'Primary Source — Supreme Court Opinion',
+    text:'The question is simply this: Can a negro, whose ancestors were imported into this country, and sold as slaves, become a member of the political community formed and brought into existence by the Constitution of the United States, and as such become entitled to all the rights, and privileges, and immunities, guaranteed by that instrument to the citizen?... We think they are not, and that they are not included, and were not intended to be included, under the word "citizens" in the Constitution.',
+    attr:'— Chief Justice Roger Taney, Dred Scott v. Sandford, 1857'},
+  questions:[
+    {q:'Chief Justice Taney\'s ruling most directly contributed to the coming of the Civil War by:',
+     opts:['Convincing Abraham Lincoln to run for president on an explicitly abolitionist platform in the Election of 1860','Declaring the Missouri Compromise unconstitutional, eliminating the legal mechanism through which Congress had managed slavery\'s territorial expansion for nearly four decades, and making any political compromise on the issue impossible','Providing the legal justification for Southern states to secede, as Taney ruled that Northern free states could not legally bar slaveholders from bringing enslaved people into their territory','Outraging the South by threatening to end slavery in the existing slave states, triggering secessionist movements in the Deep South'],
+     ans:1,
+     exp:'Taney\'s ruling that Congress had no authority to prohibit slavery in territories struck down the Missouri Compromise line, which had managed sectional tension since 1820. More importantly, it made the central question of territorial expansion legally undecidable through politics — if Congress couldn\'t restrict slavery anywhere, there was no political solution. This judicial coup against compromise is why the decision inflamed rather than resolved sectional crisis.'},
+    {q:'The 14th Amendment (1868) most directly responded to Taney\'s ruling by:',
+     opts:['Granting Congress explicit authority to regulate the territorial expansion of slavery in all U.S. territories','Overturning the decision by granting citizenship to all persons born or naturalized in the United States, explicitly repudiating the holding that Black Americans could not be citizens','Establishing federal judicial review of state laws that discriminated against formerly enslaved people on the basis of race','Requiring the Supreme Court to reconstitute its membership to remove justices appointed before the Civil War'],
+     ans:1,
+     exp:'The 14th Amendment\'s citizenship clause directly targets and destroys Taney\'s holding. Where Taney said Black people "were not intended to be included" as citizens, the 14th Amendment declares anyone born or naturalized in the U.S. is automatically a citizen. It is a direct constitutional repudiation of Dred Scott.'},
+  ]},
+  {period:'p5',stimulus:{meta:'Secondary Source — Historian',
+    text:'Reconstruction was not simply "the period after the Civil War." It was a genuine constitutional revolution — the most radical transformation of American law and society attempted before the New Deal. That it failed was not because it was too radical, but because it was abandoned before it could be consolidated. The federal government withdrew its commitment to Black political equality not because it had been achieved, but because Northern white voters grew tired of enforcing it.',
+    attr:'— Adapted from Eric Foner, Reconstruction: America\'s Unfinished Revolution, 1988'},
+  questions:[
+    {q:'Foner\'s characterization of Reconstruction as an "unfinished revolution" most directly challenges which traditional historical interpretation?',
+     opts:['The view that the 13th, 14th, and 15th Amendments were fundamentally flawed legal instruments that failed to adequately define citizenship or protect civil rights','The "Dunning School" interpretation, dominant in the early 20th century, that Reconstruction was a period of corrupt misrule imposed on a suffering South by vindictive Northern radicals and that its end was a restoration of order','The argument that the Republican Party\'s commitment to Black equality during Reconstruction was primarily motivated by economic interests in Southern markets rather than genuine moral concern','The interpretation that the Compromise of 1877 represented a necessary and mutually acceptable resolution to the contested Election of 1876'],
+     ans:1,
+     exp:'Foner\'s Reconstruction explicitly inverts the Dunning School narrative. Where Dunning (and Birth of a Nation) portrayed Reconstruction as a disaster imposed on the South that the Compromise of 1877 mercifully ended, Foner argues Reconstruction was a genuine, progressive constitutional revolution that was abandoned prematurely by Northern indifference — making it an "unfinished" tragedy, not a corrupt episode mercifully concluded.'},
+  ]},
+],
+
+p6:[
+  {period:'p6',stimulus:{meta:'Primary Source — Investigative Journalism',
+    text:'The history of the Standard Oil Company [is] the story of how a great business, in the hands of a few men, has been built up contrary to all the principles of our fathers. It is the story of the illegal manipulation of a great business, carried on for years with the connivance of railroad officials, of public officials, of courts... Standard has been not only the most successful but the most thoroughly illegal organization in American business.',
+    attr:'— Ida Tarbell, The History of the Standard Oil Company, 1904'},
+  questions:[
+    {q:'Tarbell\'s investigation of Standard Oil most directly represents which broader Progressive Era development?',
+     opts:['The labor movement\'s effort to organize industrial workers through collective bargaining and strike action to challenge corporate power from below','The muckraking tradition of investigative journalism that used detailed exposure of corporate abuses to generate public pressure for government regulation','The Socialist Party\'s argument that private ownership of industrial corporations should be replaced by collective public ownership','The Populist movement\'s demand that the federal government directly take over railroad and telegraph networks to protect farmers from exploitation'],
+     ans:1,
+     exp:'Tarbell is the defining example of muckraking — the Progressive Era form of investigative journalism that exposed corporate and political corruption in detailed, documented form to shame institutions into reform. Her Standard Oil series is credited with building the public outrage that led to the Supreme Court\'s 1911 order breaking up Standard Oil under the Sherman Antitrust Act.'},
+    {q:'Which of the following Progressive Era developments most directly resulted from the type of public pressure Tarbell\'s journalism generated?',
+     opts:['The passage of the Sherman Antitrust Act of 1890, which preceded Tarbell\'s investigation and provided the legal framework she argued had been systematically violated','The Supreme Court\'s 1911 decision ordering the dissolution of Standard Oil into 34 separate companies under the Sherman Antitrust Act','The creation of the Interstate Commerce Commission in 1887, which established federal regulation of railroad rates that Tarbell argued Standard Oil had corruptly manipulated','The passage of the Clayton Antitrust Act in 1914, which strengthened antitrust enforcement and specifically exempted labor unions from antitrust prosecution'],
+     ans:1,
+     exp:'The 1911 Standard Oil dissolution is the direct consequence of the public pressure Tarbell\'s journalism built over seven years. The Sherman Act already existed (1890), but it took Tarbell\'s detailed documentation of Standard\'s abuses — published serially in McClure\'s Magazine — to force the Roosevelt and then Taft administrations to actually prosecute the case.'},
+  ]},
+  {period:'p6',stimulus:{meta:'Secondary Source — Historical Analysis',
+    text:'The Dawes Act of 1887 must be understood as a form of cultural warfare, not benevolent reform. Its architects genuinely believed they were saving Native Americans by destroying the communal land and kinship systems that organized their societies. The allotment policy reduced Native landholdings from 138 million acres in 1887 to 48 million acres by 1934 — a 65 percent reduction — while its assimilation programs actively suppressed Native language, religion, and political organization.',
+    attr:'— Adapted from Vine Deloria Jr. and Clifford Lytle, American Indians, American Justice, 1983'},
+  questions:[
+    {q:'The authors\' characterization of the Dawes Act as "cultural warfare" most directly challenges which contemporary justification for the policy?',
+     opts:['The argument that allotment would reduce federal expenditure on Native reservations by eliminating the need for Bureau of Indian Affairs administration','The humanitarian argument that breaking up communal tribal lands and assigning individual allotments would integrate Native Americans into American economic and civic life, elevating their status','The claim that allotment was necessary to open "surplus" Native land to white settlement in order to fulfill the promises of the Homestead Act for landless white farmers','The legal argument that the federal government\'s treaty obligations required it to divide tribal lands into individual parcels to secure Native property rights against future encroachment'],
+     ans:1,
+     exp:'The Dawes Act\'s authors presented the policy as humanitarian: private property ownership and individual farming would "civilize" Native Americans and bring them into American society. Deloria and Lytle expose this as ideological cover for land theft: the "assimilation" was forced cultural destruction, and the practical result was 90 million acres transferred to white ownership.'},
+  ]},
+],
+};
+
+let selectedUnits = [];
+let pool = [];
+let poolIdx = 0;
+let score = 0;
+let streak = 0;
+let totalAnswered = 0;
+let answered = false;
+let currentSet = null;
+let currentQinSet = 0;
+
+function toggleUnit(id) {
+  if (id === 'mix') {
+    const was = selectedUnits.includes('mix');
+    selectedUnits = was ? [] : ['mix'];
+    ['p1','p2','p3','p4','p5','p6'].forEach(u => document.getElementById('unit-'+u).classList.remove('selected'));
+    document.getElementById('unit-mix').classList.toggle('selected', !was);
+  } else {
+    selectedUnits = selectedUnits.filter(u => u !== 'mix');
+    document.getElementById('unit-mix').classList.remove('selected');
+    const i = selectedUnits.indexOf(id);
+    if (i > -1) selectedUnits.splice(i, 1);
+    else selectedUnits.push(id);
+    document.getElementById('unit-'+id).classList.toggle('selected', selectedUnits.includes(id));
+  }
+  const ready = selectedUnits.length > 0;
+  document.getElementById('startBtn').disabled = !ready;
+  document.getElementById('startBtn').textContent = ready ? 'Start Exam-Style MCQ →' : 'Select units to begin';
+}
+
+function buildPool() {
+  pool = [];
+  const units = selectedUnits.includes('mix') ? ['p1','p2','p3','p4','p5','p6'] : selectedUnits;
+  units.forEach(u => { if (SETS[u]) pool.push(...SETS[u].map(s => ({...s}))); });
+  shuffle(pool);
+}
+
+function shuffle(a) {
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+function startGame() {
+  buildPool();
+  poolIdx = 0; score = 0; streak = 0; totalAnswered = 0;
+  showScreen('mcqScreen');
+  loadSet();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { showScreen('homeScreen'); }
+
+function loadSet() {
+  if (pool.length === 0) buildPool();
+  if (poolIdx >= pool.length) { shuffle(pool); poolIdx = 0; }
+  currentSet = pool[poolIdx];
+  currentQinSet = 0;
+  renderQ();
+}
+
+function renderQ() {
+  answered = false;
+  const q = currentSet.questions[currentQinSet];
+  const isSet = currentSet.questions.length > 1;
+
+  const sb = document.getElementById('stimBlock');
+  if (currentSet.stimulus) {
+    sb.style.display = 'block';
+    document.getElementById('stimMeta').textContent = currentSet.stimulus.meta;
+    document.getElementById('stimText').textContent = '\u201C' + currentSet.stimulus.text + '\u201D';
+    document.getElementById('stimAttr').textContent = currentSet.stimulus.attr;
+  } else {
+    sb.style.display = 'none';
+  }
+
+  document.getElementById('qTag').textContent = PTAGS[currentSet.period] || 'APUSH';
+
+  const badge = document.getElementById('setBadge');
+  if (isSet) {
+    badge.style.display = 'inline-block';
+    badge.textContent = 'Question ' + (currentQinSet+1) + ' of ' + currentSet.questions.length + ' in this set';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('expBox').className = 'exp-box';
+  document.getElementById('nextBtn').className = 'next-btn';
+  document.getElementById('qNum').textContent = totalAnswered + 1;
+  document.getElementById('accNum').textContent = totalAnswered === 0 ? '–' : Math.round((score/totalAnswered)*100) + '%';
+  document.getElementById('progFill').style.width = (totalAnswered === 0 ? 0 : Math.round((score/totalAnswered)*100)) + '%';
+  document.getElementById('streakNum').textContent = streak;
+
+  const letters = ['A','B','C','D'];
+  const ol = document.getElementById('optsList');
+  ol.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-ltr">' + letters[i] + '</span>' + opt;
+    btn.onclick = () => selectAns(i, q.ans, q.exp);
+    ol.appendChild(btn);
+  });
+}
+
+function selectAns(chosen, correct, exp) {
+  if (answered) return;
+  answered = true;
+  totalAnswered++;
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add(chosen === correct ? 'correct' : 'missed');
+    else if (i === chosen) b.classList.add('wrong');
+  });
+  if (chosen === correct) { score++; streak++; }
+  else { streak = 0; }
+
+  const eb = document.getElementById('expBox');
+  document.getElementById('expLabel').textContent = chosen === correct ? '✓ Correct' : '✗ Incorrect — here\'s why:';
+  document.getElementById('expText').textContent = exp;
+  eb.className = 'exp-box show ' + (chosen === correct ? 'ok' : 'bad');
+
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('accNum').textContent = Math.round((score/totalAnswered)*100) + '%';
+  document.getElementById('progFill').style.width = Math.round((score/totalAnswered)*100) + '%';
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQ() {
+  currentQinSet++;
+  if (currentQinSet >= currentSet.questions.length) {
+    poolIdx++;
+    loadSet();
+  } else {
+    renderQ();
+  }
+}
+</script>
+</body>
+</html>
